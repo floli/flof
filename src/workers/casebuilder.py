@@ -1,11 +1,11 @@
-import os, re, shutil, string, tempfile
+import os, re, shutil, tempfile
 from os.path import join
+from xml.etree import ElementTree
 
 from baseworker import BaseWorker
 from common import norm_path
 
 from PyFoam.Applications.CaseBuilder import CaseBuilder
-
 
 
 class Casebuilder(BaseWorker):
@@ -15,44 +15,43 @@ class Casebuilder(BaseWorker):
 
     defaults = {"mesh_arguments":"", "overwrite":True}
 
-    #: Snippet used to in the pfcb file to utilise fluentMeshToFoam
-    meshprep_fluent = """ <meshpreparation mode="utility"> <utility command="fluentMeshToFoam" arguments="{mshfile} {mesh_arguments}"/> </meshpreparation> """
-    
-    #: Snippet to copy mesh from another case. Add time="N" attribute to copy template in order to use mesh from a specific timestep
-    meshprep_copy = """ <meshpreparation> <copy template="{source}"/> </meshpreparation> """
-
-    
-    def mesh_prep(self, template_map):
-        """ Fills in the mesh preperation method in the pfcb file. """
+    def mesh_prep(self, pfcb_etree):
+        """ Fills in the mesh preparation method in the pfcb file. """
         method = self.config["mesh_method"]
-        mesh = self.config["mesh"]
+        if method == "spider":
+            spider = Spider({"configuration": self.config["mesh"]})
+            mesh = spider.output_file
+        else:
+            mesh = self.config["mesh"]
+            
         args = self.config["mesh_arguments"]
                     
-        snippet = ""
+        meshprep = pfcb_etree.find("meshpreparation")
+        if meshprep == None:
+            meshprep = ElementTree.SubElement(pfcb_etree.getroot(), "meshpreparation")
+        else:
+            meshprep.clear()
 
         if method == "fluent":
-            snippet = self.meshprep_fluent.format(mesh_arguments = args, mshfile = mesh)
+            meshprep.attrib["mode"] = "utility"
+            utility = ElementTree.SubElement(meshprep, "utility")
+            utility.attrib["command"] = "fluentMeshToFoam"
+            utility.attrib["arguments"] = mesh + " " + args
         elif method == "copy":
-            snippet = self.meshprep_copy.format(source = mesh)
-        elif method == "spider":
-            spider = Spider({"configuration": self.config["mesh"]})
-            snippet = self.meshprep_fluent.format(mesh_arguments = args, mshfile = spider.output_file)
+            copy = ElementTree.SubElement(meshprep, "copy")
+            copy.attrib["template"] = mesh
 
-        template_map["meshpreparation"] = snippet
-
+            
     def create_pfcb(self, f, template_dir):
         """ Creates the pyFoamCaseBuilder control file from the template. """
         self.logger.info("Creating pyFoamCaseBuilder control file %s", f.name)
+        pfcb_etree = ElementTree.ElementTree()
+        pfcb_etree.parse(self.config["casebuilder_template"])
 
-        pfcb_template_map = {}
+        pfcb_etree.getroot().attrib["template"] = template_dir
+        self.mesh_prep(pfcb_etree)
 
-        pfcb_template_map["case_template"] = template_dir
-
-        self.mesh_prep(pfcb_template_map)
-
-        pfcb_template = open(self.config["casebuilder_template"]).read()
-        template = string.Template(pfcb_template).safe_substitute(pfcb_template_map)
-        f.write(template)
+        pfcb_etree.write(f)
         f.flush()
 
 
