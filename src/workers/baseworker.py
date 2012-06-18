@@ -1,4 +1,5 @@
 import logging, os, shlex, subprocess, sys
+import common
 from common import norm_path
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,11 @@ class BaseWorker():
 
         # Setup logging: Add an additional handler for worker based logfiles
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__ )
-        handler = logging.FileHandler(self._logfilename())
+        if self._logfilename():
+            handler = logging.FileHandler(self._logfilename())
+        else:
+            handler = logging.NullHandler() # 
+            
         handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s:%(levelname)s - %(message)s"))
         self.logger.addHandler(handler)
         
@@ -60,8 +65,12 @@ class BaseWorker():
 
         # Use an additional logger without formatting for process output. 
         proclog = logging.getLogger(self.name)
-        proclog.propagate = False
-        proclog.addHandler(logging.FileHandler(self._logfilename()))
+        proclog.propagate = False # Process output should not propage to the main logger
+        logfile = self._logfilename()
+        if logfile == None:
+            proclog.addHandler(logging.NullHandler())
+        else:
+            proclog.addHandler(logging.FileHandler(self._logfilename()))
 
         if print_output:
             proclog.addHandler(logging.StreamHandler())
@@ -84,6 +93,9 @@ class BaseWorker():
 
     def _logfilename(self):
         """ Returns a path for the log file. Creates it, if not already existing. """
+        if not common.getboolean(self.config["log"]):
+            return None
+                                     
         logfile = norm_path(self.case, "log/", self.name)
         try:
             os.makedirs(os.path.dirname(logfile))

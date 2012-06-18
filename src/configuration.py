@@ -5,6 +5,7 @@ from common import norm_path
 default_config = StringIO.StringIO("""
 [DEFAULT]
 do = True
+log = True
 
 [general]
 server_port = 18000

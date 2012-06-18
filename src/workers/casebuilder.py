@@ -131,7 +131,8 @@ class Casebuilder(BaseWorker):
         #     os.makedirs(os.path.dirname(logfile))
         # except OSError:
         #     pass
-        shutil.copyfile(self.tmplog.name, logfile)
+        if logfile:
+            shutil.copyfile(self.tmplog.name, logfile)
     
                   
     def run(self):
