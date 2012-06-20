@@ -47,7 +47,17 @@ class Spider(BaseWorker):
             
         
 class Decompose(BaseWorker):
-    """ Utilise the pyFoam decomposer to decompose the case for multiple processors. """
+    """ The Decompose worker utilises ``pyFoamDecompose`` to construct a ``decomposeParDict`` and executes OpenFOAMs ``decomposePar``. Configuration options are: 
+
+method
+    Selects the method for decomposition, e.g. simple, scotch, hierarchical, ...
+
+proc
+    Number of processors to decompose for.
+
+n, delta, ...
+    These options depend on the decomposition method and correspond the the values in the ``decomposeParDict``.
+    """
 
     position = 700
     
@@ -95,7 +105,7 @@ class FoamRunner(BaseWorker):
 
 
 class PotentialFoam(BaseWorker):
-    """ Executes potentialFoam to generate inital values.
+    """ Executes ``potentialFoam`` to generate inital values.
 
     Configuration options are:
 
@@ -107,7 +117,6 @@ class PotentialFoam(BaseWorker):
 
     no_function_objects
         Corresponds to the -noFunctionObjects switch of potentialFoam. Omits execution of function objects.
-
     """
 
     position = 800
@@ -158,6 +167,7 @@ class ExternalCommand(BaseWorker):
 
     @property
     def cmd(self):
+        """ Returns the command from the configuration. """
         return self.config["command"]
  
 

@@ -9,7 +9,17 @@ from PyFoam.Applications.CaseBuilder import CaseBuilder
 
 
 class Casebuilder(BaseWorker):
-    """ Worker that creates the actual case from a template using pyFoamCaseBuilder. """
+    """ The Casebuilder Worker uses pyFoams ``pyFoamCaseBuilder`` (PFCB) to build a new case from a PFCB control file. Configuration options are:
+
+    casebuilder_template
+        The PFCB control file. This file assigns boundary conditions to patches
+
+    case_template
+        The template from which the case is built.
+
+    overwrite 
+        Defaults to True. Overwrite the case if it already exists.
+    """
     
     position = 500
 
