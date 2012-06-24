@@ -67,7 +67,7 @@ class BaseWorker():
         logfile = self._logfilename()
 
         if logfile:
-            proclog.addHandler(logging.FileHandler(logfile)
+            proclog.addHandler(logging.FileHandler(logfile))
             
         if print_output:
             proclog.addHandler(logging.StreamHandler())
