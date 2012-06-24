@@ -41,10 +41,10 @@ class WorkerStack:
                     logger.warning("Worker %s has no position assigned. Discarding.", class_str)
                     continue
                 if config.getboolean(section, "do"):
-                    worker_obj = worker_cls(section, config.option_dict(section), {"configuration": config})
-                    worker_obj.position = position
-                    logger.debug("Added worker %s, position %i, name %s", class_str, worker_obj.position, worker_obj.name)
-                    self._workers.append( worker_obj )
+                    worker_cls._init_bag = (section, config.option_dict(section), {"configuration": config})
+                    worker_cls.position = position
+                    logger.debug("Added worker %s, position %i, name %s", class_str, worker_cls.position, section)
+                    self._workers.append( worker_cls )
 
         self._workers.sort(key = lambda a: a.position)
         
@@ -52,7 +52,9 @@ class WorkerStack:
     def pop_worker(self, max_pos = sys.maxint):
         """ Returns the next object in order up to max_pos. """
         if self._workers and self._workers[0].position < max_pos:
-            return self._workers.pop(0) 
+            cls = self._workers.pop(0) 
+            obj = cls(*cls._init_bag)
+            return obj
         else:
             return None
 
