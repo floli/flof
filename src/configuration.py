@@ -44,6 +44,14 @@ class Configuration(ConfigParser.SafeConfigParser):
         if cmd_config:
             self.merge_config(cmd_config)
 
+
+    def update_defaults(self, defaults):
+        """ Updates the defaults. This is needed because the DEFAULT section can't be modified directly.
+        Code taken from ConfigParser.py """        
+        if defaults:
+            for key, value in defaults.items():
+                self._defaults[self.optionxform(key)] = value
+
                
     def merge_config(self, args):
         """ Merge configuration options from the command line.
@@ -52,12 +60,16 @@ class Configuration(ConfigParser.SafeConfigParser):
             parts = re.split(r"\.|=", a, maxsplit=2)
             if not len(parts) == 3:
                 continue
+            if parts[0] == "DEFAULT": # Modifying the DEFAULT section needs special treatment
+                self.update_defaults( {parts[1] : parts[2]} )
+                continue
             try:
                 self.add_section(parts[0])
             except ConfigParser.DuplicateSectionError:
                 pass
             self.set(*parts)
 
+            
     def get(self, section, option, raw=False, vars={}):
         i_dict = self._interp_dict
         i_dict.update(vars)
