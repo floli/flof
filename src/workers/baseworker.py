@@ -35,11 +35,9 @@ class BaseWorker():
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__ )
         if self._logfilename():
             handler = logging.FileHandler(self._logfilename())
-        else:
-            handler = logging.NullHandler() # 
+            handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s:%(levelname)s - %(message)s"))
+            self.logger.addHandler(handler)
             
-        handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s:%(levelname)s - %(message)s"))
-        self.logger.addHandler(handler)
         
     def do(self):
         """ Returns the do key of the config section. """
@@ -67,11 +65,10 @@ class BaseWorker():
         proclog = logging.getLogger(self.name)
         proclog.propagate = False # Process output should not propage to the main logger
         logfile = self._logfilename()
-        if logfile == None:
-            proclog.addHandler(logging.NullHandler())
-        else:
-            proclog.addHandler(logging.FileHandler(self._logfilename()))
 
+        if logfile:
+            proclog.addHandler(logging.FileHandler(logfile)
+            
         if print_output:
             proclog.addHandler(logging.StreamHandler())
             
