@@ -19,6 +19,21 @@ class Casebuilder(BaseWorker):
 
     overwrite 
         Defaults to True. Overwrite the case if it already exists.
+
+    mesh_method
+        Either ``fluent`` or ``copy`` or ``spider``
+
+    mesh
+        Where to get the mesh from.
+        If ``mesh_method`` is ``fluent`` this points to fluent mesh.
+        If ``mesh_method`` is ``copy`` this points to an OpenFOAM case.
+        If ``mesh_method`` is ``spider`` this points to a spider config file.
+
+    time
+        Used only if ``mesh_method`` is ``copy``. Timestep to copy the mesh from.
+
+    mesh_arguments
+        Optional additional arguments which are provided to ``fluentMeshToFoam``, e.g. ``-writeSets -writeZones``. Ignored for method=copy.
     """
     
     position = 500
@@ -50,6 +65,8 @@ class Casebuilder(BaseWorker):
         elif method == "copy":
             copy = ElementTree.SubElement(meshprep, "copy")
             copy.attrib["template"] = mesh
+            if "time" in self.config:
+                copy.attrib["time"] = self.config["time"]
 
             
     def create_pfcb(self, f, template_dir):
