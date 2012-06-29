@@ -15,6 +15,7 @@ Contents:
    flof
    flofserver
    flofqueue
+   pfcbcreator
    workerstack
    workers
    configuration

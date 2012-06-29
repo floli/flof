@@ -5,13 +5,17 @@ flof.py
 
 Command line arguments
 ----------------------
+``flof.py [options] configfile``
+
+Options are:
+
 .. program:: flof.py
 
-.. cmdoption:: -c <file>, --config <file>
+.. cmdoption:: -c <file>, --config=<file>
 
     Configuration file that describes the case to work on.
 
-.. cmdoption:: -f <pfcbfile>, --file <pfcbfile>
+.. cmdoption:: -f <pfcbfile>, --file=<pfcbfile>
 
     Save the pyFoamCaseBuilder file to the given location and exit
 
