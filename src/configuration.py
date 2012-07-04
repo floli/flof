@@ -36,7 +36,8 @@ class Configuration(ConfigParser.SafeConfigParser):
         self.readfp(default_config)
         default_config.seek(0) # Rewind default_config after usage
         
-        self.read(norm_path(global_config))
+        if global_config:
+            self.read(norm_path(global_config))
         if case_config:
             case_config = norm_path(case_config)
             self.read(case_config)
