@@ -1,0 +1,4 @@
+2012-07-07 18:25:37,466 - workers.casebuilder.Casebuilder:INFO - Creating pyFoamCaseBuilder control file /tmp/tmpA4_g1E
+2012-07-07 18:25:37,480 - workers.casebuilder.Casebuilder:INFO - Creating case.
+2012-07-07 18:25:37,480 - workers.casebuilder.Casebuilder:DEBUG - Running pyFoamCaseBuilder with /tmp/tmpA4_g1E /home/florian/flof/src/tests/files/cavity.target --force
+2012-07-07 18:25:38,413 - workers.casebuilder.Casebuilder:DEBUG - Cleaning up temporary directory: /tmp/tmpLqafmy

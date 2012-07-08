@@ -1,0 +1,69 @@
+2012-07-07 18:25:38,414 - workers.workers.Decompose:INFO - Decomposing for 2 processors.
+[4m PyFoam WARNING on line 232 of file /home/florian/software/src/PyFoam/PyFoam/Execution/FoamThread.py : Process 3039 was already dead (B[m
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : 2.1.1-221db2718bbb
+Exec   : decomposePar -case /home/florian/flof/src/tests/files/cavity.target
+Date   : Jul 07 2012
+Time   : 18:25:41
+Host   : "horus"
+PID    : 3039
+Case   : /home/florian/flof/src/tests/files/cavity.target
+nProcs : 1
+sigFpe : Enabling floating point exception trapping (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster
+allowSystemOperations : Disallowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh
+
+Calculating distribution of cells
+Selecting decompositionMethod simple
+
+Finished decomposition in 0 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+Number of cells = 200
+Number of faces shared with processor 1 = 20
+Number of processor patches = 1
+Number of processor faces = 20
+Number of boundary faces = 440
+
+Processor 1
+Number of cells = 200
+Number of faces shared with processor 0 = 20
+Number of processor patches = 1
+Number of processor faces = 20
+Number of boundary faces = 440
+
+Number of processor faces = 20
+Max number of cells = 200 (0% above average 200)
+Max number of processor patches = 1 (0% above average 1)
+Max number of faces between processors = 20 (0% above average 20)
+
+Time = 0
+
+Processor 0: field transfer
+Processor 1: field transfer
+
+End.
+
+Killing PID 3039
+2012-07-07 18:25:43,920 - workers.workers.Decompose:DEBUG - pyFoamDecompose.py --clear --method=simple --n=(2,1,1) --delta=0.001 /home/florian/flof/src/tests/files/cavity.target 2 returned with 0

@@ -1,0 +1,11 @@
+Sat Jul  7 18:25:37 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:37 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:37 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:37 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:38 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:38 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:38 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:38 2012 by florian in horus :Application: flof.py cavity.conf  | with cwd /home/florian/flof/src/tests/files  |  
+Sat Jul  7 18:25:41 2012 by florian in horus :Application: pyFoamDecompose.py --clear --method=simple --n=(2,1,1) --delta=0.001 /home/florian/flof/src/tests/files/cavity.target 2  | with cwd /home/florian/flof/src/tests/files/cavity.target  |  
+Sat Jul  7 18:25:44 2012 by florian in horus :Application: pyFoamRunner.py --autosense-parallel icoFoam -case /home/florian/flof/src/tests/files/cavity.target  | with cwd /home/florian/flof/src/tests/files/cavity.target  |  Starting 
+Sat Jul  7 18:25:47 2012 by florian in horus :Application: pyFoamRunner.py --autosense-parallel icoFoam -case /home/florian/flof/src/tests/files/cavity.target  | with cwd /home/florian/flof/src/tests/files/cavity.target  |  Ended 

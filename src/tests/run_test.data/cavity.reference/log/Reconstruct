@@ -1,0 +1,49 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : 2.1.1-221db2718bbb
+Exec   : reconstructPar -latestTime -case /home/florian/flof/src/tests/files/cavity.target
+Date   : Jul 07 2012
+Time   : 18:25:49
+Host   : "horus"
+PID    : 3085
+Case   : /home/florian/flof/src/tests/files/cavity.target
+nProcs : 1
+sigFpe : Enabling floating point exception trapping (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster
+allowSystemOperations : Disallowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Time = 0.5
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+End.
+
+2012-07-07 18:25:49,798 - workers.foamutility.ReconstructCase:DEBUG - reconstructPar -latestTime -case /home/florian/flof/src/tests/files/cavity.target returned with 0
