@@ -14,7 +14,7 @@ class TestRun(unittest.TestCase):
 
         
     def test_01_run(self):
-        os.chdir("./files")
+        os.chdir("./run_test.data")
         ret_code = subprocess.call(["flof.py", "cavity.conf"])
         self.assertEqual(ret_code, 0)
 
