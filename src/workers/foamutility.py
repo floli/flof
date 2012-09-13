@@ -1,6 +1,50 @@
 import common
 from baseworker import BaseWorker
 
+import os, re 
+
+class Solver(BaseWorker):
+    def num_proc(self):
+        regexp = "processor[0-9]*"
+        count = 0
+        for d in os.listdir(self.case):
+            if re.match(regexp, d):
+                count += 1
+
+        return count
+
+
+    def run(self):
+        solver = self.config.attrib["name"]
+        import pdb; pdb.set_trace() 
+        if common.getboolean(self.config.get("parallel", True)):
+            num_proc = self.num_proc()
+            cmd = "mpirun -n %s %s -parallel" % (num_proc, solver)
+        else:
+            cmd = solver
+
+        print cmd
+
+        
+    
+import tempfile
+
+class ChangeDictionary(BaseWorker):
+    def run(self):
+        changes = self.config.text
+        tmp = tempfile.NamedTemporaryFile()
+        tmp.write(changes)
+        tmp.flush()
+        args = self.config.get("args", "")
+        import pdb; pdb.set_trace() 
+
+        cmd = "changeDictionary -case %s %s -dict %s" % (self.case, args, tmp.name)
+        self.start_process(cmd)
+
+
+
+
+
 class FoamUtility(BaseWorker):
     """ Executes standard OpenFOAM utilities for post-processing.
 
