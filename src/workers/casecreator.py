@@ -58,6 +58,7 @@ class CaseCreator(BaseWorker):
 
 
     def create_BCs(self):
+        self.logger.info("Creating the mesh from XML fields description.")
         mesh_BCs = ParsedBoundaryDict(join(self.case, "constant/polyMesh/boundary"))
         boundaries = []
         for BC_group in self.config.findall("./boundaries/boundary"):
@@ -72,7 +73,6 @@ class CaseCreator(BaseWorker):
 
 
         os.mkdir(join(self.case, "0"))
-        import pdb; pdb.set_trace() 
         for field in self.config.findall("./fields/field"):
             
             field_name = field.attrib["name"]
@@ -95,6 +95,27 @@ class CaseCreator(BaseWorker):
             field_file["boundaryField"] = boundaryField
 
             field_file.writeFile()
+
+
+    def copy_0_time(self):
+        template = norm_path(self.config.attrib["template"])
+        node = self.config.find("./zeroTime")
+        timestep = node.attrib.get("timestep", "0")
+        if timestep == "latestTime":
+            casedirs = []
+            for d in [i for i in os.listdir(template) if os.path.isdir(i) ]:
+                try:
+                    casedirs.append(float(d))
+                except ValueError:
+                    pass
+            timestep = max(casedirs)
+
+        src = join(template, timestep)
+        self.logger.info("Copy 0 timestep from %s", src)
+        os.mkdir(join(self.case, "0"))
+        for f in os.listdir(src):
+            shutil.copy( join(src, f), join(self.case, "0") )
+
             
 
     def run(self):
@@ -104,8 +125,19 @@ class CaseCreator(BaseWorker):
             else:
                 raise WorkerError("Case directory %s exists and overwrite == False" % self.case)
                                      
-        
+
         self.copy_files()
         self.create_mesh()
-        # self.create_BCs()
-        self.create_0_time
+
+        # There are two methods to create the boundary conditions. Either copy them from a zero time
+        # directory of the template or create them from a <fields> node. These methods a mutually exclusice
+        # The first encontered tag is used, the other one discarded.
+        for tag in self.config:
+            if tag.tag == "zeroTime":
+                self.copy_0_time()
+                break
+            if tag.tag == "fields":
+                self.create_BCs()
+                break
+            
+
