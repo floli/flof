@@ -1,6 +1,23 @@
 import ConfigParser, re, StringIO
 from common import norm_path
 
+import xml.etree.ElementTree as ET
+
+def parse_merge(source):
+    conf = ET.parse(source)
+
+    try:
+        defaults = ET.parse(norm_path("~/.flof/defaults.xml"))
+    except IOError:
+        pass # No defaults file present
+    else:
+        default_attr = defaults.getroot().attrib
+        default_attr.update(conf.getroot().attrib)
+        conf.getroot().attrib = default_attr
+
+    return conf
+
+
 
 default_config = StringIO.StringIO("""
 [DEFAULT]
