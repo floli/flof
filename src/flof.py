@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 
-import logging, optparse, os, sys, threading, traceback
+import logging, optparse, os, sys
 
 logger = logging.getLogger(__name__)
   
@@ -8,11 +8,6 @@ import common, configuration
 from common import norm_path
 
 from workers.baseworker import WorkerFactory, register_bundled_workers
-
-from workers.foamutility import ChangeDictionary
-
-import xml.etree.ElementTree as ET
-
 
 def add_options():
     """ Factory function for the OptionParser. """
@@ -23,8 +18,6 @@ def add_options():
 
 
 def main():
-    common.setup_logging("~/.flof/flof.log")
-
     oparser = add_options()
     (options, args) = oparser.parse_args()
 
@@ -35,10 +28,12 @@ def main():
         print "Configuration file %s not existing." % args[0]
         sys.exit(-1)
 
-
+    config = configuration.parse_merge(args[0])
+    loglevel = config.getroot().get("loglevel", 10)
+    common.setup_logging("~/.flof/flof.log", loglevel)
+ 
     register_bundled_workers()
     
-    config = ET.parse(args[0])
     os.chdir(os.path.dirname(norm_path(args[0])))
 
     wf = WorkerFactory(config)
