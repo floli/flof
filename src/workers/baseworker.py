@@ -55,6 +55,7 @@ class BaseWorker():
     
     def __init__(self, configuration, context):
         # The directory to the case. The is no guarantee it actually exists, e.g. when it is created by the CaseBuilder.
+        self.context = context
         self.case = norm_path(context["name"])
         self.config = configuration.getroot()
     
@@ -89,7 +90,7 @@ class BaseWorker():
 
         # Use an additional logger without formatting for process output. 
         proclog = logging.getLogger(self.config.tag)
-        proclog.propagate = False # Process output should not propage to the main logger
+        proclog.propagate = False # Process output should not propagate to the main logger
         proclog.setLevel(logging.INFO)
         logfile = self._logfilename()
 
@@ -142,8 +143,10 @@ class BaseWorker():
 
 
 
-import casecreator
+import casecreator, foamutility
 
 def register_bundled_workers():
     """ Registers the workers that are bundled with flof at the WorkerRegistry. """
     WorkerRegistry.register("create", casecreator.CaseCreator)
+    WorkerRegistry.register("solve", foamutility.Solver)
+    

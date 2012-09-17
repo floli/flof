@@ -60,40 +60,23 @@ class CaseCreator(BaseWorker):
     def create_BCs(self):
         self.logger.info("Creating the mesh from XML fields description.")
         mesh_BCs = ParsedBoundaryDict(join(self.case, "constant/polyMesh/boundary"))
-        boundaries = []
-        for BC_group in self.config.findall("./boundaries/boundary"):
-            boundary = ( (BC_group.attrib["name"], []) )
-            for mesh_BC in mesh_BCs:
-                if re.match(BC_group.attrib["pattern"], mesh_BC):
-                    boundary[1].append(mesh_BC)
-            boundaries.append(boundary)
-
-        print boundaries
-                    
-
-
+    
         os.mkdir(join(self.case, "0"))
         for field in self.config.findall("./fields/field"):
-            
             field_name = field.attrib["name"]
             field_file = WriteParameterFile(join(self.case, "0", field_name))
             field_file.content["internalField"] = "uniform " + field.find("./ic").attrib["value"]
             field_file.content["dimensions"] = _OF_dimensions[field_name]
-            
-            for BC_pattern in field.findall("./bc"):   # For each pattern definition
-                print "BC_pattern", BC_pattern.attrib
-                boundaryField = {}
-                for boundary in boundaries:            # For each boundary group
-                    if re.match(BC_pattern.attrib["pattern"], boundary[0]):
-                        print "Matched BC", boundary
-                        type = BC_pattern.attrib["type"]
+            boundaryField = {}
+            for mesh_BC in mesh_BCs:  
+                for BC_pattern in field.findall("./bc"):
+                    if re.match(BC_pattern.attrib["pattern"], mesh_BC):
+                        boundaryField[mesh_BC] = { "type" : BC_pattern.attrib["type"] }
                         value = ast.literal_eval("{" + BC_pattern.attrib.get("parameters", "") + "}")
-                        for BC in boundary[1]:
-                            boundaryField[BC] = { "type":type }
-                            boundaryField[BC].update(value)
-            print "boundaryField", boundaryField
+                        boundaryField[mesh_BC].update(value)
+                        break
+                        
             field_file["boundaryField"] = boundaryField
-
             field_file.writeFile()
 
 

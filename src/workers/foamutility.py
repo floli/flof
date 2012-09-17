@@ -16,14 +16,18 @@ class Solver(BaseWorker):
 
     def run(self):
         solver = self.config.attrib["name"]
-        import pdb; pdb.set_trace() 
+        
         if common.getboolean(self.config.get("parallel", True)):
             num_proc = self.num_proc()
-            cmd = "mpirun -n %s %s -parallel" % (num_proc, solver)
         else:
-            cmd = solver
+            num_proc = 0
+        import pdb; pdb.set_trace() 
+        if num_proc > 0:
+            cmd = self.context["mpi_command"].format(numProc=num_proc, command=solver)
+        else:
+            cmd = "%s -case %s" % (solver, self.case)
 
-        print cmd
+        print self.start_process(cmd)
 
         
     
