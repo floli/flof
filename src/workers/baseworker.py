@@ -149,4 +149,5 @@ def register_bundled_workers():
     """ Registers the workers that are bundled with flof at the WorkerRegistry. """
     WorkerRegistry.register("create", casecreator.CaseCreator)
     WorkerRegistry.register("solve", foamutility.Solver)
+    WorkerRegistry.register("decompose", foamutility.Decomposer)
     

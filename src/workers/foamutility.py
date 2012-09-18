@@ -21,14 +21,34 @@ class Solver(BaseWorker):
             num_proc = self.num_proc()
         else:
             num_proc = 0
-        import pdb; pdb.set_trace() 
+
         if num_proc > 0:
             cmd = self.context["mpi_command"].format(numProc=num_proc, command=solver)
         else:
             cmd = "%s -case %s" % (solver, self.case)
 
+        cmd += " -case %s" % self.case
         print self.start_process(cmd)
 
+
+from PyFoam.RunDictionary.ParsedParameterFile import WriteParameterFile
+
+class Decomposer(BaseWorker):
+    def run(self):
+        method = self.config.attrib["method"]
+        n = self.config.attrib["n"]
+        self.logger.info("Decomposing case for %s domains using method %s.", n, method)
+        decomposeParDict = WriteParameterFile(os.path.join(self.case, "system/decomposeParDict"), createZipped=False)
+        decomposeParDict["method"] = method
+        decomposeParDict["numberOfSubdomains"] = n
+        coeffs = {}
+        for i in self.config:
+            coeffs[i.tag] = i.text
+            
+        decomposeParDict[method + "Coeffs"] = coeffs
+        decomposeParDict.writeFile()
+
+        self.start_process("decomposePar -case %s" % self.case)
         
     
 import tempfile
