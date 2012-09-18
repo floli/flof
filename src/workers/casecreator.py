@@ -7,15 +7,18 @@ from baseworker import BaseWorker
 from common import norm_path
 
 
-_OF_dimensions = {
-    "U" : "[0 1 -1 0 0 0 0]",
-    "p" : "[0 2 -2 0 0 0 0]"
+_OF_units = {
+    "U" : ("[0 1 -1 0 0 0 0]", "volVectorField"), 
+    "p" : ("[0 2 -2 0 0 0 0]", "volScalarField"),
+    "k" : ("[ 0 2 -2 0 0 0 0 ]", "volScalarField"),
+    "omega" : ("[ 0 0 -1 0 0 0 0 ]", "volScalarField")
     }
 
 
 class CaseCreator(BaseWorker):
 
     def _copy_rec(self, rel_dir, dir_node):
+        """ Recursive copy according to the <files> entry. """
         src_dir = norm_path(self.config.attrib["template"], rel_dir)
         target = join(self.case, rel_dir)
         for f in os.listdir(src_dir):
@@ -32,9 +35,7 @@ class CaseCreator(BaseWorker):
                 for tag in dir_node.findall("./directory"):
                     if re.match(tag.attrib["name"], f):
                         self._copy_rec( os.path.join(rel_dir, f), tag)
-        
-                                               
-        
+                        
     
     def copy_files(self):
         files_tag = self.config.find("files")
@@ -42,6 +43,7 @@ class CaseCreator(BaseWorker):
 
 
     def create_mesh(self):
+        """ Create the mesh either from a fluent file or by copying from another OF case. """
         if self.config.find("./mesh/fluent") is not None:
             tag = self.config.find("./mesh/fluent")
             mesh = norm_path(tag.attrib["mesh"])
@@ -58,15 +60,16 @@ class CaseCreator(BaseWorker):
 
 
     def create_BCs(self):
+        """ Create boundary conditions from patterns. """
         self.logger.info("Creating the mesh from XML fields description.")
         mesh_BCs = ParsedBoundaryDict(join(self.case, "constant/polyMesh/boundary"))
     
         os.mkdir(join(self.case, "0"))
         for field in self.config.findall("./fields/field"):
             field_name = field.attrib["name"]
-            field_file = WriteParameterFile(join(self.case, "0", field_name))
+            field_file = WriteParameterFile(join(self.case, "0", field_name), className=_OF_units[field_name][1])
             field_file.content["internalField"] = "uniform " + field.find("./ic").attrib["value"]
-            field_file.content["dimensions"] = _OF_dimensions[field_name]
+            field_file.content["dimensions"] = _OF_units[field_name][0]
             boundaryField = {}
             for mesh_BC in mesh_BCs:  
                 for BC_pattern in field.findall("./bc"):
@@ -81,6 +84,7 @@ class CaseCreator(BaseWorker):
 
 
     def copy_0_time(self):
+        """ Copy the boundary conditions from another case. """
         template = norm_path(self.config.attrib["template"])
         node = self.config.find("./zeroTime")
         timestep = node.attrib.get("timestep", "0")
