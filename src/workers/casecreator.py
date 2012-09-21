@@ -11,7 +11,8 @@ _OF_units = {
     "U" : ("[0 1 -1 0 0 0 0]", "volVectorField"), 
     "p" : ("[0 2 -2 0 0 0 0]", "volScalarField"),
     "k" : ("[ 0 2 -2 0 0 0 0 ]", "volScalarField"),
-    "omega" : ("[ 0 0 -1 0 0 0 0 ]", "volScalarField")
+    "omega" : ("[ 0 0 -1 0 0 0 0 ]", "volScalarField"),
+    "epsilon" : ("[0 2 -3 0 0 0 0]", "volScalarField")
     }
 
 
@@ -68,8 +69,8 @@ class CaseCreator(BaseWorker):
         for field in self.config.findall("./fields/field"):
             field_name = field.attrib["name"]
             field_file = WriteParameterFile(join(self.case, "0", field_name), className=_OF_units[field_name][1])
-            field_file.content["internalField"] = "uniform " + field.find("./ic").attrib["value"]
-            field_file.content["dimensions"] = _OF_units[field_name][0]
+            field_file["dimensions"] = _OF_units[field_name][0]
+            field_file["internalField"] = "uniform " + field.find("./ic").attrib["value"]
             boundaryField = {}
             for mesh_BC in mesh_BCs:  
                 for BC_pattern in field.findall("./bc"):
