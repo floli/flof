@@ -1,7 +1,8 @@
 import ast, os, re, shutil
 from os.path import join
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedBoundaryDict, WriteParameterFile
+from PyFoam.RunDictionary.ParsedParameterFile import ParsedBoundaryDict, WriteParameterFile, ParsedParameterFile
+from PyFoam.Basics.DataStructures import DictProxy
 import common
 from baseworker import BaseWorker
 from common import norm_path
@@ -71,6 +72,10 @@ class CaseCreator(BaseWorker):
             field_file = WriteParameterFile(join(self.case, "0", field_name), className=_OF_units[field_name][1])
             field_file["dimensions"] = _OF_units[field_name][0]
             field_file["internalField"] = "uniform " + field.find("./ic").attrib["value"]
+            # Write and reopen the file to have to correct order of dimensions/internalField and after
+            # that boundaryField.
+            field_file.writeFile()
+            field_file = ParsedParameterFile(join(self.case, "0", field_name))
             boundaryField = {}
             for mesh_BC in mesh_BCs:  
                 for BC_pattern in field.findall("./bc"):
