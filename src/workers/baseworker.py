@@ -6,8 +6,6 @@ import common
 from common import norm_path
 
 
-
-
 class WorkerRegistry():
     workers = {}
     
@@ -16,30 +14,27 @@ class WorkerRegistry():
         self.workers[tagname] = cls
 
     
-
 class WorkerFactory():
-    def __init__(self, config):
+    def __init__(self, config, context = {}):
         self.conf_root = config.getroot()
-
-    def create_context(self):
-        ctx = self.conf_root.attrib
-        ctx.update(self.conf_root.find("case").attrib)
-        return ctx
-
+        self.context = context
 
     def workers(self):
         """ Yields all workers in order of the XML file, even if they are not activated. """
         workers = WorkerRegistry.workers
-        case_node = self.conf_root.find("case")
-        for node in case_node:
+        for node in self.conf_root:
             if node.tag in workers:
                 conf_etree = ET.ElementTree(node)
                 cls = workers[node.tag]
-                obj = cls(conf_etree, self.create_context())
+                obj = cls(conf_etree, self.context)
                 yield obj
-                
 
 
+    def execute(self):
+        """ Executes all workers. """
+        for w in self.workers():
+            if w.do():
+                w.run()
 
 
 class WorkerError(Exception):
@@ -51,12 +46,15 @@ class WorkerError(Exception):
 
     
 class BaseWorker():
-    """ Base Class for all workers. Workers not inherited from BaseWorker will not be executed. """
+    """ Base Class for all workers. """
     
     def __init__(self, configuration, context):
         # The directory to the case. The is no guarantee it actually exists, e.g. when it is created by the CaseBuilder.
         self.context = context
-        self.case = norm_path(context["name"])
+        if "name" in context:
+            self.case = norm_path(context["name"])
+        else:
+            self.case = None
         self.config = configuration.getroot()
     
         # Setup logging: Add an additional handler for worker based logfiles
@@ -117,8 +115,8 @@ class BaseWorker():
             return ret_code
 
     def _logfilename(self):
-        """ Returns a path for the log file. Creates it, if not already existing. """
-        if not common.getboolean(self.config.get("log", True)):
+        """ Returns a path for the case log file. Creates it, if not already existing. """
+        if not common.getboolean(self.config.get("log", True)) or self.case is None:
             return None
                                      
         logfile = norm_path(self.case, "log/", self.config.tag)
@@ -141,12 +139,37 @@ class BaseWorker():
         print ET.tostring(self.config) # Well, not exactly pretty, but better than nothing
 
 
+class RootWorker(BaseWorker):
+    """ A worker that just add its attributes to the context and runs a WorkerFactory loop.
+    This worker is usually called directly."""
+    
+    def __init__(self, configuration, context={}):
+        BaseWorker.__init__(self, configuration, context)
+        assert(self.config.tag == "flof")
+        self.context.update(self.config.attrib)
 
+    def run(self):
+        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
+        wf.execute()
+
+
+class Case(BaseWorker):            
+    def __init__(self, configuration, context):
+        BaseWorker.__init__(self, configuration, context)
+        self.context["name"] = self.config.attrib["name"]
+
+    def run(self):
+        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
+        wf.execute()
+
+        
 
 import casecreator, foamutility
 
 def register_bundled_workers():
     """ Registers the workers that are bundled with flof at the WorkerRegistry. """
+    WorkerRegistry.register("case", Case)
+    WorkerRegistry.register("variation", Variation)    
     WorkerRegistry.register("create", casecreator.CaseCreator)
     WorkerRegistry.register("solve", foamutility.Solver)
     WorkerRegistry.register("decompose", foamutility.Decomposer)

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 import common, configuration
 from common import norm_path
 
-from workers.baseworker import WorkerFactory, register_bundled_workers
+from workers.baseworker import WorkerFactory, register_bundled_workers, RootWorker
 
 def add_options():
     """ Factory function for the OptionParser. """
@@ -36,11 +36,7 @@ def main():
     
     os.chdir(os.path.dirname(norm_path(args[0])))
 
-    wf = WorkerFactory(config)
-
-    for w in wf.workers():
-        if w.do:
-            w.run()
+    RootWorker(config).run()
     
 
 if __name__ == "__main__":
