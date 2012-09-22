@@ -179,3 +179,27 @@ class ExternalCommand(BaseWorker):
 
         ret_code = self.start_subproc(self.cmd, no_shlex=True, raise_excpt=fail_on_error, shell=True)
                               
+    
+                
+class Variation():
+    def __init__(self, configuration, context = {}):
+        self.config = configuration.getroot()
+        self.context = context
+
+
+    def do(self):
+        """ Returns the do attribute. """
+        return common.getboolean(self.config.get("do", "True"))
+
+    
+    def run(self):
+        var_name = self.config.attrib["variable"]
+        var_range = eval(self.config.attrib["range"])
+        import pdb; pdb.set_trace() 
+        for var in var_range:
+            ctx = self.context
+            ctx.update( {var_name : var} )
+            print "VAR", var
+            wf = WorkerFactory(ET.ElementTree(self.config), self.context)
+            wf.execute()
+            

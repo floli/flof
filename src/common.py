@@ -28,11 +28,11 @@ def norm_path(*parts):
     return os.path.abspath(os.path.expanduser(os.path.join(*parts)))
 
 
-def setup_logging(logfile):
-    """ Setup the logging. Should be called at the beginning of every execution (which is flof.py and flofsever.py only at this time). """
+def setup_logging(logfile, level=logging.DEBUG):
+    """ Setup the logging. Should be called at the beginning of every execution (which is flof.py and flofserver.py only at this time). """
     FORMAT = "%(asctime)s - %(name)s:%(levelname)s - %(message)s"
     logfile = norm_path(logfile)
-    logging.basicConfig(level = logging.DEBUG, format=FORMAT, filename = logfile)
+    logging.basicConfig(level = int(level), format=FORMAT, filename = logfile)
     ch  = logging.StreamHandler()
     ch.setFormatter(logging.Formatter(FORMAT))
     logging.getLogger().addHandler(ch)
