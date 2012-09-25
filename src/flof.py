@@ -7,13 +7,13 @@ logger = logging.getLogger(__name__)
 import common, configuration
 from common import norm_path
 
-from workers.baseworker import WorkerFactory, register_bundled_workers, RootWorker
+from workers.baseworker import WorkerRegistry, WorkerFactory, register_bundled_workers, RootWorker
 
 def add_options():
     """ Factory function for the OptionParser. """
     parser = optparse.OptionParser(usage="%prog [options] config_file")
-    parser.add_option("-f", "--file", help="Save the pyFoamCaseBuilder file to the given location and exit.")
-    parser.add_option("-c", "--config", help="Add/overwrite configuration options. Syntax: 'section.key=value,...'")
+    parser.add_option("-o", "--only", help="Execute only the named workers, separated by comma. 'case' worker is implicitly included.")
+    parser.add_option("-n", "--not", dest="do_not", help="Do not execute the named workers, separated by comma.")
     return parser
 
 
@@ -33,7 +33,13 @@ def main():
     common.setup_logging("~/.flof/flof.log", loglevel)
  
     register_bundled_workers()
-    
+
+    if options.only:
+        WorkerRegistry.workers = filter(lambda a: a in options.only.split(","), WorkerRegistry.workers)
+
+    if options.do_not:
+        WorkerRegistry.workers = filter(lambda a: a not in options.do_not.split(","), WorkerRegistry.workers)
+
     os.chdir(os.path.dirname(norm_path(args[0])))
 
     RootWorker(config).run()
