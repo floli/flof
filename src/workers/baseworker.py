@@ -48,7 +48,7 @@ class WorkerError(Exception):
 class BaseWorker():
     """ Base Class for all workers. """
     
-    def __init__(self, configuration, context):
+    def __init__(self, configuration, context, recursive_string_interpolation=True):
         # The directory to the case. The is no guarantee it actually exists, e.g. when it is created by the CaseBuilder.
         self.context = context
         if "name" in context:
@@ -56,6 +56,8 @@ class BaseWorker():
         else:
             self.case = None
         self.config = configuration.getroot()
+
+        self.do_string_interpolation(recurse=recursive_string_interpolation)
     
         # Setup logging: Add an additional handler for worker based logfiles
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__ )
@@ -138,39 +140,23 @@ class BaseWorker():
         """ Prints some formatted info on that worker. """
         print ET.tostring(self.config) # Well, not exactly pretty, but better than nothing
 
+    def do_string_interpolation(self, start_node=None, recurse=True):
+        """ Replace all strings like {U} with the value from the context dictionaries if it exists. Workers that can have subworkers should not recurse. """
+        if start_node == None:
+            start_node = self.config
+        if recurse:
+            selection = ".//"
+        else:
+            selection = "."
 
-class RootWorker(BaseWorker):
-    """ A worker that just add its attributes to the context and runs a WorkerFactory loop.
-    This worker is usually called directly."""
-    
-    def __init__(self, configuration, context={}):
-        BaseWorker.__init__(self, configuration, context)
-        assert(self.config.tag == "flof")
-        self.context.update(self.config.attrib)
-
-    def run(self):
-        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
-        wf.execute()
-
-
-class Case(BaseWorker):            
-    def __init__(self, configuration, context):
-        BaseWorker.__init__(self, configuration, context)
-        self.context["name"] = self.config.attrib["name"]
-
-    def run(self):
-        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
-        wf.execute()
-
+        for n in self.config.findall(selection):
+            try: n.text = n.text.format(**self.context)
+            except AttributeError: # Happens if text=None: A tag without content
+                pass
+            for a in n.attrib:
+                try: n.attrib[a] = n.attrib[a].format(**self.context)
+                except KeyError: pass
+                
         
 
-import casecreator, foamutility
 
-def register_bundled_workers():
-    """ Registers the workers that are bundled with flof at the WorkerRegistry. """
-    WorkerRegistry.register("case", Case)
-    WorkerRegistry.register("variation", Variation)    
-    WorkerRegistry.register("create", casecreator.CaseCreator)
-    WorkerRegistry.register("solve", foamutility.Solver)
-    WorkerRegistry.register("decompose", foamutility.Decomposer)
-    

@@ -4,6 +4,43 @@ import common
 from baseworker import BaseWorker, WorkerError
 from common import norm_path
 
+class RootWorker(BaseWorker):
+    """ A worker that just add its attributes to the context and runs a WorkerFactory loop.
+    This worker is usually called directly."""
+    
+    def __init__(self, configuration, context={}):
+        BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
+        assert(self.config.tag == "flof")
+        self.context.update(self.config.attrib)
+
+    def run(self):
+        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
+        wf.execute()
+
+
+class Case(BaseWorker):            
+    def __init__(self, configuration, context):
+        BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
+        self.context["name"] = self.config.attrib["name"]
+
+
+    def run(self):
+        wf = WorkerFactory(ET.ElementTree(self.config), self.context)
+        wf.execute()
+
+        
+
+import casecreator, foamutility
+
+def register_bundled_workers():
+    """ Registers the workers that are bundled with flof at the WorkerRegistry. """
+    WorkerRegistry.register("case", Case)
+    # WorkerRegistry.register("variation", Variation)    
+    WorkerRegistry.register("create", casecreator.CaseCreator)
+    WorkerRegistry.register("solve", foamutility.Solver)
+    WorkerRegistry.register("decompose", foamutility.Decomposer)
+    
+
 
 class Spider(BaseWorker):
     """ Worker that executes spider which meshes geometry data.
@@ -46,63 +83,6 @@ class Spider(BaseWorker):
    
             
         
-class Decompose(BaseWorker):
-    """ The Decompose worker utilises ``pyFoamDecompose`` to construct a ``decomposeParDict`` and executes OpenFOAMs ``decomposePar``. Configuration options are: 
-
-method
-    Selects the method for decomposition, e.g. simple, scotch, hierarchical, ...
-
-proc
-    Number of processors to decompose for.
-
-n, delta, ...
-    These options depend on the decomposition method and correspond the the values in the ``decomposeParDict``.
-    """
-
-    position = 700
-    
-    def run(self):    
-        proc = self.config["proc"]
-        args = "--clear"
-        
-        args += " --method=" + self.config["method"]
-        args += " --n=" + self.config["n"] if "n" in self.config else ""
-        args += " --delta=" + self.config["delta"] if "delta" in self.config else ""
-        args += " " + self.case + " " + proc
-
-        self.logger.info("Decomposing for %s processors." % proc)
- 
-        cmd = "pyFoamDecompose.py %s" % args
-        ret_code = self.start_subproc(cmd)
-
- 
-
-class FoamRunner(BaseWorker):
-    """ Runs a OpenFOAM solver. Configuration options are:
-
-    solver
-        The solver to run.
-    """
-    
-    position = 900
-    
-    def run(self):
-        solver = self.config["solver"]
-        
-        self.logger.info("Running: %s" % self.case)
-        
-        cmd = "pyFoamRunner.py --autosense-parallel %s -case %s" % (solver, self.case)
-
-        self.start_subproc(cmd)
-         
-
-    def info(self):
-        """ Returns name and current timestep. """
-        ts_file = open(norm_path(self.case, "PyFoamState.CurrentTime"))
-        timestep = ts_file.readline().strip()
-        ts_file.close
-        return {"name" : self.name, "timestep" : timestep }
-
 
 class PotentialFoam(BaseWorker):
     """ Executes ``potentialFoam`` to generate inital values.
