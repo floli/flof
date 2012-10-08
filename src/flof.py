@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 import common, configuration
 from common import norm_path
 
-from workers.baseworker import WorkerRegistry, WorkerFactory, register_bundled_workers, RootWorker
+from workers.baseworker import WorkerRegistry, WorkerFactory, register_bundled_workers
+from workers.workers import RootWorker
 
 def add_options():
     """ Factory function for the OptionParser. """

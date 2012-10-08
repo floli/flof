@@ -11,6 +11,7 @@ class WorkerRegistry():
     
     @classmethod
     def register(self, tagname, cls):
+        logger.debug("Registered worker, tag: %s, class: %s", tagname, cls)
         self.workers[tagname] = cls
 
     
@@ -140,10 +141,8 @@ class BaseWorker():
         """ Prints some formatted info on that worker. """
         print ET.tostring(self.config) # Well, not exactly pretty, but better than nothing
 
-    def do_string_interpolation(self, start_node=None, recurse=True):
-        """ Replace all strings like {U} with the value from the context dictionaries if it exists. Workers that can have subworkers should not recurse. """
-        if start_node == None:
-            start_node = self.config
+    def do_string_interpolation(self, recurse=True):
+        """ Replace all strings like {U} with the value from the context dictionary if it exists. Workers that can have subworkers should not recurse. """
         if recurse:
             selection = ".//"
         else:
@@ -151,8 +150,7 @@ class BaseWorker():
 
         for n in self.config.findall(selection):
             try: n.text = n.text.format(**self.context)
-            except AttributeError: # Happens if text=None: A tag without content
-                pass
+            except (AttributeError, KeyError): pass
             for a in n.attrib:
                 try: n.attrib[a] = n.attrib[a].format(**self.context)
                 except KeyError: pass
@@ -160,3 +158,12 @@ class BaseWorker():
         
 
 
+import casecreator, foamutility, workers
+
+def register_bundled_workers():
+    """ Registers the workers that are bundled with flof at the WorkerRegistry. """
+    WorkerRegistry.register("case", workers.Case)
+    WorkerRegistry.register("variation", workers.Variation)    
+    WorkerRegistry.register("create", casecreator.CaseCreator)
+    WorkerRegistry.register("solve", foamutility.Solver)
+    WorkerRegistry.register("decompose", foamutility.Decomposer)

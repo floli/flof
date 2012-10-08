@@ -1,7 +1,10 @@
 import ConfigParser, os, shutil
 
+import xml.etree.ElementTree as ET
+
+
 import common
-from baseworker import BaseWorker, WorkerError
+from baseworker import BaseWorker, WorkerError, WorkerFactory
 from common import norm_path
 
 class RootWorker(BaseWorker):
@@ -9,9 +12,10 @@ class RootWorker(BaseWorker):
     This worker is usually called directly."""
     
     def __init__(self, configuration, context={}):
+        context.update(configuration.getroot().attrib)
         BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
         assert(self.config.tag == "flof")
-        self.context.update(self.config.attrib)
+        
 
     def run(self):
         wf = WorkerFactory(ET.ElementTree(self.config), self.context)
@@ -20,25 +24,14 @@ class RootWorker(BaseWorker):
 
 class Case(BaseWorker):            
     def __init__(self, configuration, context):
+        context.update( { "name" : configuration.getroot().attrib["name"] } )
         BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
-        self.context["name"] = self.config.attrib["name"]
-
 
     def run(self):
         wf = WorkerFactory(ET.ElementTree(self.config), self.context)
         wf.execute()
 
         
-
-import casecreator, foamutility
-
-def register_bundled_workers():
-    """ Registers the workers that are bundled with flof at the WorkerRegistry. """
-    WorkerRegistry.register("case", Case)
-    # WorkerRegistry.register("variation", Variation)    
-    WorkerRegistry.register("create", casecreator.CaseCreator)
-    WorkerRegistry.register("solve", foamutility.Solver)
-    WorkerRegistry.register("decompose", foamutility.Decomposer)
     
 
 
@@ -161,25 +154,26 @@ class ExternalCommand(BaseWorker):
                               
     
                 
-class Variation():
-    def __init__(self, configuration, context = {}):
-        self.config = configuration.getroot()
-        self.context = context
-
-
-    def do(self):
-        """ Returns the do attribute. """
-        return common.getboolean(self.config.get("do", "True"))
-
+class Variation(BaseWorker):
+    def __init__(self, configuration, context):
+        BaseWorker.__init__(self, configuration, context, False)
     
     def run(self):
+        # Since the workers are modifying the configuration tree when doing the string interpolation
+        # we save it as a string and replay it each iteration.
+        original_node = ET.tostring(self.config)
         var_name = self.config.attrib["variable"]
         var_range = eval(self.config.attrib["range"])
-        import pdb; pdb.set_trace() 
+        self.logger.info("Starting variation loop, variable: %s, range: %s", var_name, var_range)
         for var in var_range:
             ctx = self.context
             ctx.update( {var_name : var} )
-            print "VAR", var
+            self.logger.info("Doing variation, variable: %s, value: %s", var_name, var)
             wf = WorkerFactory(ET.ElementTree(self.config), self.context)
             wf.execute()
+            self.config = ET.fromstring(original_node)
             
+
+
+
+
