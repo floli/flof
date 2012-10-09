@@ -8,8 +8,17 @@ from baseworker import BaseWorker, WorkerError, WorkerFactory
 from common import norm_path
 
 class RootWorker(BaseWorker):
-    """ A worker that just add its attributes to the context and runs a WorkerFactory loop.
-    This worker is usually called directly."""
+    """ A worker that just add its attributes to the context so they can be evaluated by sub workers.
+    that are run in a WorkerFactory loop. This worker is usually called directly.
+
+    Example configuration:
+
+    ::
+
+      <flof loglevel=10
+            mpi_command = "mpirun -n {numProc} {command} -parallel">
+      </flof>     
+    """
     
     def __init__(self, configuration, context={}):
         context.update(configuration.getroot().attrib)
@@ -18,16 +27,29 @@ class RootWorker(BaseWorker):
         
 
     def run(self):
+        """ Runs its subworkers. """
         wf = WorkerFactory(ET.ElementTree(self.config), self.context)
         wf.execute()
 
 
-class Case(BaseWorker):            
+class Case(BaseWorker):
+    """ Mostly a container class that contains subworkers that operate on a case. Runs its subworkers.
+    The ``name`` attribute is added to the context.
+
+    Example Configuration:
+
+    ::
+
+      <case name="new_case">
+      </case>
+    """
+    
     def __init__(self, configuration, context):
         context.update( { "name" : configuration.getroot().attrib["name"] } )
         BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
 
     def run(self):
+        """ Runs its subworkers. """
         wf = WorkerFactory(ET.ElementTree(self.config), self.context)
         wf.execute()
 

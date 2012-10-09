@@ -13,10 +13,7 @@ Contents:
    
    installation
    flof
-   flofserver
-   flofqueue
-   pfcbcreator
-   workerstack
+   infrastructure
    workers
    configuration
    jobqueue

@@ -1,45 +1,31 @@
-workers
+Workers
 =======
-Workers provide independent functionality which can be combined to a workflow. All included workers are derived from the :class:`~workers.baseworker.Baseworker`. Configuration options common to all workers are:
-
-class
-    Must be set. Sets the class that implements the worker.
-
-do
-    Defaults to ``True``. Enable/disable execution of that worker.
-
-position
-   Default is worker dependent. Execution order position.
-   
-case
-    Case to work on. Is used by most workers. Since usually all workers in a configuration file work on the same case this is set in the ``[DEFAULT]`` section. See :doc:`configuration`.
-
-log
-    Defaults to ``True``. Write a logfile to the ``log`` inside the case.
-
-See :doc:`configuration` for a full configuration example.
-
-.. automodule:: workers.baseworker
-   :members:
-   :undoc-members:
+Workers provide independent functionality which can be combined to a workflow. All included workers are derived from the :class:`~workers.baseworker.Baseworker`. 
 
 
+RootWorker
+----------
+.. autoclass:: workers.workers.RootWorker
+    :members:
+    :undoc-members:
 
-Casebuilder
+
+CaseWorker
+----------
+.. autoclass:: workers.workers.Case
+    :members:
+    :undoc-members:
+
+
+CaseCreator
 -----------
-.. autoclass:: workers.casebuilder.Casebuilder
+.. autoclass:: workers.casecreator.CaseCreator
     :members:
     :undoc-members:
 
-Spider
-------
-.. autoclass:: workers.workers.Spider
-    :members:
-    :undoc-members:
-
-Decompose
----------
-.. autoclass:: workers.workers.Decompose
+Decomposer
+----------
+.. autoclass:: workers.foamutility.Decomposer
     :members:
     :undoc-members:
 
@@ -49,9 +35,9 @@ PotentialFoam
     :members:
     :undoc-members:
 
-FoamRunner
+Solver
 ----------
-.. autoclass:: workers.workers.FoamRunner
+.. autoclass:: workers.foamutility.Solver
     :members:
     :undoc-members:
 

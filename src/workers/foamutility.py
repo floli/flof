@@ -4,6 +4,14 @@ from baseworker import BaseWorker
 import os, re 
 
 class Solver(BaseWorker):
+    """ Solve the case using an OpenFOAM solver. Runs in parallel if the case is decomposed and ``parallel`` is set.
+
+    ::
+
+      <solve name="simpleFoam" parallel="True" />
+
+    ``parallel`` defaults to ``True``.
+    """
     def num_proc(self):
         regexp = "processor[0-9]*"
         count = 0

@@ -7,10 +7,13 @@ from common import norm_path
 
 
 class WorkerRegistry():
+    """ Central registry. All workers need to register before they can be used from a configuration file. """
+
     workers = {}
     
     @classmethod
     def register(self, tagname, cls):
+        """ Register a worker with a tagname and a corresponding class. """
         logger.debug("Registered worker, tag: %s, class: %s", tagname, cls)
         self.workers[tagname] = cls
 
