@@ -146,7 +146,7 @@ class BaseWorker():
     def do_string_interpolation(self, recurse=True):
         """ Replace all strings like {U} with the value from the context dictionary if it exists. Workers that can have subworkers should not recurse. """
         if recurse:
-            selection = ".//"
+            selection = ".//*"
         else:
             selection = "."
 
