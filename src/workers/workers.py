@@ -45,8 +45,8 @@ class Case(BaseWorker):
     """
     
     def __init__(self, configuration, context):
-        context.update( { "name" : configuration.getroot().attrib["name"] } )
         BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
+        self.context["name"] = configuration.getroot().attrib["name"]
 
     def run(self):
         """ Runs its subworkers. """

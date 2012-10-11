@@ -55,13 +55,12 @@ class BaseWorker():
     def __init__(self, configuration, context, recursive_string_interpolation=True):
         # The directory to the case. The is no guarantee it actually exists, e.g. when it is created by the CaseBuilder.
         self.context = context
+        self.config = configuration.getroot()
+        self.do_string_interpolation(recurse=recursive_string_interpolation)
         if "name" in context:
             self.case = norm_path(context["name"])
         else:
             self.case = None
-        self.config = configuration.getroot()
-
-        self.do_string_interpolation(recurse=recursive_string_interpolation)
     
         # Setup logging: Add an additional handler for worker based logfiles
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__ )
