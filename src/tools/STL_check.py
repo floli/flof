@@ -12,6 +12,10 @@ current_solid = ""
 
 for line in fileinput.input():
     s = line.strip()
+
+    if fileinput.isfirstline():
+        print "Checking file %s" % fileinput.filename()
+        
     if s.startswith("vertex"):
         if len(s.split(" ")) != 4:
             print s
