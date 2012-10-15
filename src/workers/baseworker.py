@@ -19,8 +19,11 @@ class WorkerRegistry():
 
     
 class WorkerFactory():
-    def __init__(self, config, context = {}):
+    def __init__(self, config, context = None):
         self.conf_root = config.getroot()
+        if context is None: # You should not use context={} as default value
+            context = {}
+            
         self.context = context
 
     def workers(self):
