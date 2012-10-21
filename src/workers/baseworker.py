@@ -54,12 +54,14 @@ class WorkerError(Exception):
     
 class BaseWorker():
     """ Base Class for all workers. """
-    
-    def __init__(self, configuration, context, recursive_string_interpolation=True):
+
+    _do_recursive_string_interpolation = True
+        
+    def __init__(self, configuration, context):
         # The directory to the case. The is no guarantee it actually exists, e.g. when it is created by the CaseBuilder.
         self.context = context
         self.config = configuration.getroot()
-        self.do_string_interpolation(recurse=recursive_string_interpolation)
+        self.do_string_interpolation(recurse=self._do_recursive_string_interpolation)
         if "name" in context:
             self.case = norm_path(context["name"])
         else:

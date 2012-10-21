@@ -22,7 +22,8 @@ class RootWorker(BaseWorker):
     
     def __init__(self, configuration, context):
         context.update(configuration.getroot().attrib)
-        BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
+        self._do_recursive_string_interpolation = False
+        BaseWorker.__init__(self, configuration, context)
         assert(self.config.tag == "flof")
         
 
@@ -45,7 +46,8 @@ class Case(BaseWorker):
     """
     
     def __init__(self, configuration, context):
-        BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
+        self._do_recursive_string_interpolation = False
+        BaseWorker.__init__(self, configuration, context)
         self.context["name"] = configuration.getroot().attrib["name"]
 
     def run(self):
@@ -178,7 +180,8 @@ class ExternalCommand(BaseWorker):
                 
 class Variation(BaseWorker):
     def __init__(self, configuration, context):
-        BaseWorker.__init__(self, configuration, context, False)
+        self._do_recursive_string_interpolation = False
+        BaseWorker.__init__(self, configuration, context)
     
     def run(self):
         # Since the workers are modifying the configuration tree when doing the string interpolation
