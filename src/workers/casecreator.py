@@ -18,6 +18,7 @@ _OF_units = {
 
 
 class CaseCreator(BaseWorker):
+    """ The CaseCreator worker creates a new case from a given template, a mesh and a description of boundary conditions. """
 
     def _copy_rec(self, rel_dir, dir_node):
         """ Recursive copy according to the <files> entry. """
@@ -40,8 +41,11 @@ class CaseCreator(BaseWorker):
                         
     
     def copy_files(self):
+        """ Copy over the specified files, touch the .foam file and copy the XML configuration. """
         files_tag = self.config.find("files")
         self._copy_rec("", files_tag)
+        open(join(self.case, os.path.split(self.case)[1]) + ".foam", "w") # Touch the .foam file (for ParaView)
+        shutil.copy(self.context["config_file"], self.case)
 
 
     def create_mesh(self):

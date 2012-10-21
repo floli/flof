@@ -29,7 +29,8 @@ def main():
         print "Configuration file %s not existing." % args[0]
         sys.exit(-1)
 
-    config = configuration.parse_merge(args[0])
+    config_file = norm_path(args[0])
+    config = configuration.parse_merge(config_file)
     loglevel = config.getroot().get("loglevel", 10)
     common.setup_logging("~/.flof/flof.log", loglevel)
  
@@ -43,7 +44,7 @@ def main():
 
     os.chdir(os.path.dirname(norm_path(args[0])))
 
-    RootWorker(config).run()
+    RootWorker(config, {"config_file" : config_file} ).run()
     
 
 if __name__ == "__main__":

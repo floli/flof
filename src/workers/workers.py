@@ -8,7 +8,7 @@ from baseworker import BaseWorker, WorkerError, WorkerFactory
 from common import norm_path
 
 class RootWorker(BaseWorker):
-    """ A worker that just add its attributes to the context so they can be evaluated by sub workers.
+    """ A worker that just adds its attributes to the context so they can be evaluated by sub workers.
     that are run in a WorkerFactory loop. This worker is usually called directly.
 
     Example configuration:
@@ -20,7 +20,7 @@ class RootWorker(BaseWorker):
       </flof>     
     """
     
-    def __init__(self, configuration, context={}):
+    def __init__(self, configuration, context):
         context.update(configuration.getroot().attrib)
         BaseWorker.__init__(self, configuration, context, recursive_string_interpolation=False)
         assert(self.config.tag == "flof")
