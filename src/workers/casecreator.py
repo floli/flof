@@ -13,7 +13,8 @@ _OF_units = {
     "p" : ("[0 2 -2 0 0 0 0]", "volScalarField"),
     "k" : ("[ 0 2 -2 0 0 0 0 ]", "volScalarField"),
     "omega" : ("[ 0 0 -1 0 0 0 0 ]", "volScalarField"),
-    "epsilon" : ("[0 2 -3 0 0 0 0]", "volScalarField")
+    "epsilon" : ("[0 2 -3 0 0 0 0]", "volScalarField"),
+    "nut" : ("[0 2 -1 0 0 0 0]", "volScalarField")
     }
 
 

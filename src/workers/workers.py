@@ -35,7 +35,7 @@ class RootWorker(BaseWorker):
 
 class Case(BaseWorker):
     """ Mostly a container class that contains subworkers that operate on a case. Runs its subworkers.
-    The ``name`` attribute is added to the context.
+    The ``name`` attribute is added to the context which contains the corresponding attribute. If you need to have the full path to the case, use the self.case attibute (set in BaseWorker).
 
     Example Configuration:
 
