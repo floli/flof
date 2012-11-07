@@ -190,10 +190,12 @@ class Variation(BaseWorker):
         var_name = self.config.attrib["variable"]
         var_range = eval(self.config.attrib["range"])
         self.logger.info("Starting variation loop, variable: %s, range: %s", var_name, var_range)
+        wd = os.getcwd()
         for var in var_range:
             ctx = self.context
             ctx.update( {var_name : var} )
             self.logger.info("Doing variation, variable: %s, value: %s", var_name, var)
+            os.chdir(wd)
             wf = WorkerFactory(ET.ElementTree(self.config), self.context)
             wf.execute()
             self.config = ET.fromstring(original_node)
@@ -202,3 +204,29 @@ class Variation(BaseWorker):
 
 
 
+class Report(BaseWorker):
+    def run(self):
+        os.mkdir(os.path.join(self.case, "report"))
+        report = os.path.join(self.case, "report", "FullReport.txt")
+        cmd = "pyFoamCaseReport.py --full-report %s > %s" % (self.case, report)
+        self.start_process(cmd, no_shlex=True, shell=True)
+
+        for output in self.config.findall("./output"):
+            try:
+                send = output.attrib["send"]
+            except KeyError:
+                send = None
+            if output.attrib["format"] == "html":
+                self.html_output(report, send)
+            
+                
+
+    def html_output(self, input, send = None):
+        """ Generate HTML output. Needs the rst2html2 utility. """
+        output = input.rsplit(".")[0] + ".html"
+        cmd = "rst2html2 %s %s" % (input, output)
+        self.start_process(cmd)
+                    
+
+        
+                 
