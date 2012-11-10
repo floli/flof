@@ -5,6 +5,31 @@ logger = logging.getLogger(__name__)
 import common
 from common import norm_path
 
+class ContextManager():
+    """ A dict like object that has a overrides attribute. Values in that dict supersede the normal dict values. """
+
+    def __init__(self, data):
+        self._data = data
+    
+    overrides = {}
+    _data = {}
+
+    def __getattr__(self, attr):
+        if attr in ["update", "__setitem__"]:
+            # Attribute calls that modify the dictionary work on the underlying _data dict.
+            return self._data.__getattribute__(attr)
+        else:
+            # Reading the merged dict.
+            copy = self._data.copy()
+            copy.update(self.overrides)
+            return copy.__getattribute__(attr)
+
+    def __setttr__(self, attr, value):
+        # Debugging for now
+        import pdb; pdb.set_trace() 
+        print "SETATTR", attr
+          
+
 
 class WorkerRegistry():
     """ Central registry. All workers need to register before they can be used from a configuration file. """
@@ -21,8 +46,8 @@ class WorkerRegistry():
 class WorkerFactory():
     def __init__(self, config, context = None):
         self.conf_root = config.getroot()
-        if context is None: # You should not use context={} as default value
-            context = {}
+        if context is None: # You should not use context={} as default value in function arguments
+            context = ContextManager()
             
         self.context = context
 
