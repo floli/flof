@@ -98,7 +98,7 @@ class CaseCreator(BaseWorker):
         """ Copy the boundary conditions from another case. """
         template = norm_path(self.config.attrib["template"])
         node = self.config.find("./zeroTime")
-        timestep = node.attrib.get("timestep", "0")
+        timestep = node.attrib.get("time", "0")
         if timestep == "latestTime":
             casedirs = []
             for d in [i for i in os.listdir(template) if os.path.isdir(i) ]:
