@@ -198,5 +198,7 @@ def register_bundled_workers():
     WorkerRegistry.register("variation", workers.Variation)    
     WorkerRegistry.register("create", casecreator.CaseCreator)
     WorkerRegistry.register("solve", foamutility.Solver)
+    WorkerRegistry.register("utility", foamutility.FoamUtility)
     WorkerRegistry.register("decompose", foamutility.Decomposer)
+    WorkerRegistry.register("reconstruct", foamutility.Reconstruct)
     WorkerRegistry.register("report", workers.Report)

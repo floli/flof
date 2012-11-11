@@ -1,17 +1,12 @@
 import common
 from baseworker import BaseWorker
 
-import os, re 
+import os, re
 
-class Solver(BaseWorker):
-    """ Solve the case using an OpenFOAM solver. Runs in parallel if the case is decomposed and ``parallel`` is set.
 
-    ::
-
-      <solve name="simpleFoam" parallel="True" />
-
-    ``parallel`` defaults to ``True``.
-    """
+class FoamRunner(BaseWorker):
+    """ Base class for workers that run a OpenFOAM application. Provides methods to get decomposition and the MPI run command. """
+    
     def num_proc(self):
         regexp = "processor[0-9]*"
         count = 0
@@ -21,9 +16,23 @@ class Solver(BaseWorker):
 
         return count
 
+    def time(self):
+        """ Returns the time argument for the utility. """
+        
+        if "time" not in self.config.attrib:
+            time = ""
+        elif self.config.attrib["time"] == "latestTime":
+            time = "-latestTime"
+        else:
+            time = "-time %s" % self.config.attrib["time"]
 
-    def run(self):
-        solver = self.config.attrib["name"]
+        return time
+
+    def cmd(self, args = ""):
+        """ Construct the commandl line, including MPI run command, additional args can be supplied as a string. """
+        cmd = self.config.attrib["name"]
+        cmd += " -case %s" % self.case
+        cmd += " " + args
         
         if common.getboolean(self.config.get("parallel", True)):
             num_proc = self.num_proc()
@@ -31,17 +40,43 @@ class Solver(BaseWorker):
             num_proc = 0
 
         if num_proc > 0:
-            cmd = self.context["mpi_command"].format(numProc=num_proc, command=solver)
-        else:
-            cmd = "%s -case %s" % (solver, self.case)
+            cmd = self.context["mpi_command"].format(numProc=num_proc, command=app)
 
-        cmd += " -case %s" % self.case
-        print self.start_process(cmd)
+        return cmd
+
+        
+    
+
+class Solver(FoamRunner):
+    """ Solve the case using an OpenFOAM solver. Runs in parallel if the case is decomposed and ``parallel`` is set.
+
+    ::
+
+      <solve name="simpleFoam" parallel="True" />
+
+    ``parallel`` defaults to ``True``.
+    """
+
+
+    def run(self):
+        print self.start_process(self.cmd())
 
 
 from PyFoam.RunDictionary.ParsedParameterFile import WriteParameterFile
 
 class Decomposer(BaseWorker):
+    """ Decomposes the case for computation on multiple processors.
+
+    ::
+
+      <decompose n="2" method="simple">
+        <n>(2 1 1)</n>
+        <delta>0.001></delta>
+      </decompose>
+
+    All childen, e.g. n, delta are added to the corresponding Coeffs dictionary..
+    """
+        
     def run(self):
         method = self.config.attrib["method"]
         n = self.config.attrib["n"]
@@ -77,65 +112,40 @@ class ChangeDictionary(BaseWorker):
 
 
 
-class FoamUtility(BaseWorker):
+class FoamUtility(FoamRunner):
     """ Executes standard OpenFOAM utilities for post-processing.
 
-    Configuration options are:
-    
-    utility
-        The utility to run.
+    ::
 
-    time
-        Optional, run for a specific timestep. Can be either a timestep or latestTime.
+      <utility name="wallShearStress" time="latestTime" parallel="true" />
 
-    parallel
-        Autosense a decomposed case and run in parallel. Defaults to True.
+    ``parallel`` defaults to ``True``. 
     """
 
-    position = 1000
-
-    defaults = {"parallel":True}
-
-    
     def run(self):
-        self.logger.info("Running %s FOAM utility", self.config["utility"])
-        if "time" not in self.config:
-            time = ""
-        elif self.config["time"] == "latestTime":
-            time = "-latestTime"
-        else:
-            time = "-time %s" % self.config["time"]
-
-        if common.getboolean(self.config["parallel"]):
-            parallel = "--autosense-parallel"
-        else:
-            parallel = ""
+        self.logger.info("Running %s utility", self.config.attrib["name"])
+    
         
-        cmd = "pyFoamRunner.py %s %s %s -case %s" % (parallel, self.config["utility"], time, self.case)
+        cmd = self.cmd(self.time())
 
-        self.start_subproc(cmd)
+        self.start_process(cmd)
         
 
 
-class ReconstructCase(BaseWorker):
+class Reconstruct(FoamRunner):
     """ Reconstructs a case. Usually executed at the very end.
 
-    Configuration options are:
+    ::
 
-    time
-        Optional, reconstruct specific timestep or latestTime
+      <reconstruct time="100" />
     """
 
-    position = 1100
-
     def run(self):
-        if "time" not in self.config:
-            time = ""
-        elif self.config["time"] == "latestTime":
-            time = "-latestTime"
-        else:
-            time = "-time %s" % self.config["time"]
+        self.logger.info("Reconstructing case")
+        if self.num_proc() == 0:
+            self.logger.warning("Case not decomposed, skipping reconstruct.")
+            return
+        
+        cmd = "reconstructPar %s -case %s" % (self.time(), self.case)
 
-        cmd = "reconstructPar %s -case %s" % (time, self.case)
-
-        self.start_subproc(cmd)
+        self.start_process(cmd)
