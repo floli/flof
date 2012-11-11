@@ -63,15 +63,9 @@ FoamUtility
     :members:
     :undoc-members:
 
-ReconstructCase
----------------
-.. autoclass:: workers.foamutility.ReconstructCase
-    :members:
-    :undoc-members:
-
-ExternalCommand
----------------
-.. autoclass:: workers.workers.ExternalCommand
+Reconstruct
+-----------
+.. autoclass:: workers.foamutility.Reconstruct
     :members:
     :undoc-members:
 
