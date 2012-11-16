@@ -15,7 +15,6 @@ Contents:
    flof
    infrastructure
    workers
-   configuration
    jobqueue
    common
 

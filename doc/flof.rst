@@ -11,6 +11,10 @@ Options are:
 
 .. program:: flof.py CONFIG
 
+.. cmdoption:: -c <context>, --only=<context>
+
+   Added/override values to the context, format: key=value,key2=value2,...
+
 .. cmdoption:: -o <workers>, --only=<workers>
 
    Execute only the given workers, seperated by comma.

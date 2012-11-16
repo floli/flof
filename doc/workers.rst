@@ -25,13 +25,11 @@ RootWorker
     :members:
     :undoc-members:
 
-
 CaseWorker
 ----------
 .. autoclass:: workers.workers.Case
     :members:
     :undoc-members:
-
 
 CaseCreator
 -----------
@@ -42,12 +40,6 @@ CaseCreator
 Decomposer
 ----------
 .. autoclass:: workers.foamutility.Decomposer
-    :members:
-    :undoc-members:
-
-PotentialFoam
--------------
-.. autoclass:: workers.workers.PotentialFoam
     :members:
     :undoc-members:
 

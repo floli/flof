@@ -100,55 +100,6 @@ class Spider(BaseWorker):
    
             
         
-
-class PotentialFoam(BaseWorker):
-    """ Executes ``potentialFoam`` to generate inital values.
-
-    Configuration options are:
-
-    backup_0_to
-        If given the worker performs a backup of the '0' dir to given location before running potentialFoam.
-
-    overwrite
-        Overwrite an already existing backup of the 0 directory.
-
-    no_function_objects
-        Corresponds to the -noFunctionObjects switch of potentialFoam. Omits execution of function objects.
-    """
-
-    position = 800
-
-    defaults = {"overwrite":False, "backup_0_to":"", "no_function_objects":True}
-    
-    def backup_0_dir(self, target, overwrite):
-        """ Does a backup of the directory 0 with the starting conditions before potentialFoam overwrites it. """
-        target = norm_path(self.case, target)
-        
-        if os.path.isdir(target) and overwrite:
-            self.logger.debug("Deleting directory %s.", target)
-            shutil.rmtree(target)
-        elif os.path.isdir(target) and not overwrite:
-            # Directory exists but should not be overwritten.
-            return
-
-        self.logger.info("Backup 0 dir to %s.", target)
-        shutil.copytree(norm_path(self.case, "0"), target)
-       
-        
-    def run(self):
-        backup_dir = self.config["backup_0_to"]
-        if backup_dir == "":
-            self.logger.debug("NOT doing backup of 0 before running potentialFoam.")
-        else:
-            self.backup_0_dir(backup_dir, self.config["overwrite"])
-
-        no_f_objects = self.config["no_function_objects"] 
-
-        cmd = "pyFoamRunner.py --autosense-parallel potentialFoam -case %s %s" % (self.case,  "-noFunctionObjects" if no_f_objects else "")
-
-        self.start_subproc(cmd)
-
-
 class ExternalCommand(BaseWorker):
     """ Executes an external command. No default position thus it must be specified in config.
 
