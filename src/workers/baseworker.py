@@ -202,3 +202,5 @@ def register_bundled_workers():
     WorkerRegistry.register("decompose", foamutility.Decomposer)
     WorkerRegistry.register("reconstruct", foamutility.Reconstruct)
     WorkerRegistry.register("report", workers.Report)
+    WorkerRegistry.register("external", workers.ExternalCommand)
+    

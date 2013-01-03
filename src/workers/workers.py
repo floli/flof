@@ -101,7 +101,11 @@ class Spider(BaseWorker):
             
         
 class ExternalCommand(BaseWorker):
-    """ Executes an external command. No default position thus it must be specified in config.
+    """Executes an external command.
+
+    ::
+
+      <external fail_on_error="True" command="ls -1 {name}" />
 
     command
         Command to be executed.
@@ -110,23 +114,17 @@ class ExternalCommand(BaseWorker):
         If True the worker fails if command returns a non-zero exitcode. Defaults to True.
     """
     
-    defaults = {"fail_on_error":True}
-        
-
     @property
     def cmd(self):
         """ Returns the command from the configuration. """
-        return self.config["command"]
+        return self.config.attrib["command"]
  
 
-    def info(self):
-        return {"name": self.name, "command": self.cmd}
-
     def run(self):
-        fail_on_error = common.getboolean(self.config["fail_on_error"])
-
-        ret_code = self.start_subproc(self.cmd, no_shlex=True, raise_excpt=fail_on_error, shell=True)
-                              
+        fail_on_error = common.getboolean(self.config.get("fail_on_error", True))
+        ret_code = self.start_process(self.cmd, no_shlex=True, raise_excpt=fail_on_error, shell=True)
+        self.logger.info("External command %s return with %s.", self.cmd, ret_code)
+        
     
                 
 class Variation(BaseWorker):
