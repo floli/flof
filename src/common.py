@@ -25,6 +25,7 @@ import os
 
 def norm_path(*parts):
     """ Returns the normalized, absolute, expanded and joint path, assembled of all parts. """
+    parts = [ str(p) for p in parts ] 
     return os.path.abspath(os.path.expanduser(os.path.join(*parts)))
 
 
