@@ -8,8 +8,12 @@ from common import norm_path
 class ParameterFile():
     def __init__(self, filename):
         self.path = norm_path(filename)
-        parsed = self._grammar.parseFile(self.path, parseAll=True)
-        self._data = self._as_dict(parsed)
+        try:
+            parsed = self._grammar.parseFile(self.path, parseAll=True)
+            self._data = self._as_dict(parsed)
+        except IOError:
+            self._data = {}
+
         
     @property
     def _grammar(self):        
@@ -91,4 +95,23 @@ class ParameterFile():
 
     def __len__(self):
         return len(self._data)
+    
    
+_OF_units = {
+    "U" : ("[0 1 -1 0 0 0 0]", "volVectorField"), 
+    "p" : ("[0 2 -2 0 0 0 0]", "volScalarField"),
+    "k" : ("[ 0 2 -2 0 0 0 0 ]", "volScalarField"),
+    "omega" : ("[ 0 0 -1 0 0 0 0 ]", "volScalarField"),
+    "epsilon" : ("[0 2 -3 0 0 0 0]", "volScalarField"),
+    "nut" : ("[0 2 -1 0 0 0 0]", "volScalarField")
+    }
+
+class FieldFile(ParameterFile):
+    """ A file representing a field, like U, k, omega, ... Automatically sets dimension and adds the appropriate header. """
+    def __init__(self, filename, fieldname, internalfield):
+        ParameterFile.__init__(self, filename)
+        header = { "version":"2.0", "format":"ascii", "object":fieldname, "class":_OF_units[fieldname][1] }
+        self["FoamFile"] = header
+        self["internalField"] = internalfield
+        self["dimensions"] = _OF_units[fieldname][0]
+        
